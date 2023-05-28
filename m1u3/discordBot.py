@@ -1,34 +1,28 @@
-import discord
 import random
-from setting import settings
-# Переменная intents - хранит привилегии бота
+import discord
+from discord.ext import commands
+
 intents = discord.Intents.default()
-# Включаем привелегию на чтение сообщений
 intents.message_content = True
-# Создаем бота в переменной client и передаем все привелегии
-client = discord.Client(intents=intents)
+botPrefix = '!'
+bot = commands.Bot(command_prefix=botPrefix, intents=intents)
 
-def magicBall():
-    answer = random.choice(['Focus an ask again', 'Yes', 'No', 'No doubt about it', "Chances aren't good", "Can't say now"])
-    return answer
-
-@client.event
+@bot.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    print(f'Hello! I am {bot.user}')
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if message.content.startswith('$hello'):
-        await message.channel.send("Hi!")
-    elif message.content.startswith('$bye'):
-        await message.channel.send("\\U0001f642")
-    elif message.content.startswith('$magicBall'): #после $magicBall вопрос
-        await message.channel.send("The Ball says: " + magicBall())
-    elif message.content.startswith('$randomNumber'):
-        await message.channel.send("Random number: " + str(random.randint(0,100)))
-    else:
-        await message.channel.send(message.content)
+@bot.command()
+async def random(ctx, min_val=1, max_val=None):
+    if max_val is None:
+        max_val = min_val
+        min_val = 1
 
-client.run(settings["TOKEN"])
+    try:
+        min_val = int(min_val)
+        max_val = int(max_val)
+        random_number = random.randint(min_val, max_val)
+        await ctx.send(f"Рандомное число от {min_val} до {max_val}: {random_number}")
+    except ValueError:
+        await ctx.send("Неверный ввод. Пожалуйста введите еще раз правильно")
+        
+bot.run('token')
